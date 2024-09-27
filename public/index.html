@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <title>AudioPlayer</title>
+
+    <link rel="stylesheet" href="./assets/site.css">
+    <link rel="manifest" href="./manifest.json">
+</head>
+<body>
+    <div class="content">
+        <div class="player">
+            <img alt="Cover image" id="audioImage" src="./assets/img/default_img.jpg">
+            <p id="title"><b>Title:</b> N/A</p>
+            <p id="artist"><b>Artist:</b> N/A</p>
+            <p id="album"><b>Album:</b> N/A</p>
+            <audio controls src="" id="audioPlayer"></audio>
+        </div>
+
+        <div class="songsList">
+            <h3>Uploaded Songs</h3>
+
+            <template id="songTemplate">
+                <p class="availableSong" onclick="pickSong(this.textContent)"></p>
+            </template>
+        </div>
+
+        <div class="upload">
+            <h3>Upload Song</h3>
+
+            <div id="songUpload">
+                <p id="songName" hidden="true"></p>
+                <button id="pickSong">Pick song</button>
+            </div>
+            
+            <div id="imageUpload">
+                <p id="imgName" hidden="true"></p>
+                <button id="pickImg">Pick image</button>
+            </div>
+
+            <input id="titleInput" type="text" placeholder="Title" />
+            <input id="authorInput" type="text" placeholder="Author" />
+            <input id="albumInput" type="text" placeholder="Album" />
+
+            <button id="btnUpload">
+                Upload
+            </button>
+
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script>
+        navigator.serviceWorker.register('./sw.js', {type: 'module'})
+        .then(reg => {
+            console.log('SW registered!', reg)
+        })
+        .catch(err => console.error('Error registering service worker', err));
+
+        fetch('/records')
+        .then((res) => {
+
+            if(res.ok) {
+
+                res.json()
+                .then((data) => {
+
+                    data.files.forEach(fileName => {
+                        
+                        let songsList = document.querySelector('.songsList')
+
+                        let template = document.querySelector('#songTemplate');
+                        var clone = template.content.cloneNode(true);
+
+                        let availableSong = clone.querySelector('.availableSong')
+                        availableSong.textContent = fileName.replaceAll("_", " ").replaceAll(".mp3", "");
+
+                        songsList.appendChild(clone);
+                    });
+                })
+            }
+            
+        }).catch(err => {
+            console.log(err);
+        })
+
+    </script>
+</body>
+</html>
